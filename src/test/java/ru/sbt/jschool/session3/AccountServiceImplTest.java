@@ -304,6 +304,37 @@ public class AccountServiceImplTest {
         assertEquals(Result.RECIPIENT_NOT_FOUND, res);
     }
 
+    @Test public void testDuplicateOperations() throws Exception {
+        FraudMonitoringImpl fraudMonitoring = new FraudMonitoringImpl();
+
+        AccountService accountService = new AccountServiceImpl(fraudMonitoring);
+
+        Result res = accountService.create(1, 1, 100f, RUR);
+
+        assertEquals(Result.OK, res);
+
+        res = accountService.create(2, 2, 10, EUR);
+
+        assertEquals(Result.OK, res);
+
+        Payment payment = new Payment(1, 1, 1, 2, 2, RUR_TO_EUR);
+
+        res = accountService.doPayment(payment);
+
+        assertEquals(Result.OK, res);
+
+        res = accountService.doPayment(payment);
+
+        assertEquals(Result.ALREADY_EXISTS, res);
+
+        payment = new Payment(1, 42, 42, 42, 42, RUR_TO_EUR);
+
+        res = accountService.doPayment(payment);
+
+        assertEquals(Result.ALREADY_EXISTS, res);
+
+    }
+
     private void checkAccount(Account acc, long clientID, long accountID, float balance, Currency currency) {
         assertNotNull(acc);
 
