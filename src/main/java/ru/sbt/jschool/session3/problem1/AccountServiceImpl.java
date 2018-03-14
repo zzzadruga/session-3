@@ -59,6 +59,8 @@ public class AccountServiceImpl implements AccountService {
         if (operations.contains(payment.getOperationID()))
             return Result.ALREADY_EXISTS;
 
+        operations.add(payment.getOperationID());
+
         if (fraudMonitoring.check(payment.getPayerID()))
             return Result.FRAUD;
 
