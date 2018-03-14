@@ -13,6 +13,13 @@ public class Account {
 
     private float balance;
 
+    public Account(long clientID, long accountID, Currency currency, float balance) {
+        this.clientID = clientID;
+        this.accountID = accountID;
+        this.currency = currency;
+        this.balance = balance;
+    }
+
     public long getClientID() {
         return clientID;
     }

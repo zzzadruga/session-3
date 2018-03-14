@@ -8,5 +8,5 @@ public enum Result {
     FRAUD,
     ALREADY_EXISTS,
     PAYER_NOT_FOUND,
-    RECIPIENT_NOT_FOUND;
+    RECIPIENT_NOT_FOUND
 }

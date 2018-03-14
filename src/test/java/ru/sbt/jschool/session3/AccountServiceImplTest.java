@@ -17,6 +17,7 @@
 
 package ru.sbt.jschool.session3;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +34,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static ru.sbt.jschool.session3.problem1.Currency.EUR;
 import static ru.sbt.jschool.session3.problem1.Currency.RUR;
+import static ru.sbt.jschool.session3.problem1.Currency.RUR_TO_EUR;
 import static ru.sbt.jschool.session3.problem1.Currency.USD;
 
 /**
@@ -51,7 +53,7 @@ public class AccountServiceImplTest {
 
         assertEquals(Result.OK, res);
 
-        List<Account> accounts = accountService.findForClient(1);
+        Collection<Account> accounts = accountService.findForClient(1);
 
         assertNotNull("Account should be found for a client 1", accounts);
 
@@ -171,7 +173,7 @@ public class AccountServiceImplTest {
 
         AccountService accountService = new AccountServiceImpl(fraudMonitoring);
 
-        Result res = accountService.create(1, 1, Currency.RUR_TO_EUR*5, EUR);
+        Result res = accountService.create(1, 1, 5, EUR);
 
         assertEquals(Result.OK, res);
 
@@ -187,11 +189,11 @@ public class AccountServiceImplTest {
 
         Account acc = accountService.find(1);
 
-        checkAccount(acc, 1, 1, Currency.RUR_TO_EUR*4f, EUR);
+        checkAccount(acc, 1, 1, 4f, EUR);
 
         acc = accountService.find(2);
 
-        checkAccount(acc, 2, 2, 1f*Currency.RUR_TO_EUR, RUR);
+        checkAccount(acc, 2, 2, 10 + RUR_TO_EUR, RUR);
     }
 
     @Test public void testOKPaymentWithCurrencyConversion3() throws Exception {
@@ -207,19 +209,19 @@ public class AccountServiceImplTest {
 
         assertEquals(Result.OK, res);
 
-        Payment payment = new Payment(1, 1, 1, 2, 2, 1f);
+        Payment payment = new Payment(1, 1, 1, 2, 2, RUR_TO_EUR);
 
         res = accountService.doPayment(payment);
 
         assertEquals(Result.OK, res);
 
-        Account acc = accountService.find(Long.MAX_VALUE);
+        Account acc = accountService.find(1);
 
-        checkAccount(acc, 1, Long.MAX_VALUE, Currency.RUR_TO_EUR*4f, EUR);
+        checkAccount(acc, 1, 1, 100f - RUR_TO_EUR, RUR);
 
         acc = accountService.find(2);
 
-        checkAccount(acc, 2, 2, 1f*Currency.RUR_TO_EUR, RUR);
+        checkAccount(acc, 2, 2, 11, EUR);
     }
 
     @Test public void testPayerNotFound() throws Exception {
@@ -309,7 +311,7 @@ public class AccountServiceImplTest {
 
         assertEquals(accountID, acc.getAccountID());
 
-        assertEquals(balance, acc.getBalance());
+        assertEquals(balance, acc.getBalance(), .01f);
 
         assertEquals(currency, acc.getCurrency());
     }
