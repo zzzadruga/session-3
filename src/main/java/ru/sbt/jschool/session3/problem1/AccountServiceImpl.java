@@ -46,8 +46,7 @@ public class AccountServiceImpl implements AccountService {
     public Result doPayment(Payment payment) {
         if (operationIds.contains(payment.getOperationID())) {
             return Result.ALREADY_EXISTS;
-        }
-        else {
+        } else {
             operationIds.add(payment.getOperationID());
         }
         if (findForClient(payment.getPayerID()).size() == 0 || find(payment.getPayerAccountID()) == null) {
@@ -63,30 +62,30 @@ public class AccountServiceImpl implements AccountService {
 
     }
 
-    private Result checkCurrencyAndDoPayment(Payment payment){
+    private Result checkCurrencyAndDoPayment(Payment payment) {
         Account payer = find(payment.getPayerAccountID());
         Account recipient = find(payment.getRecipientAccountID());
         if (payer.getCurrency() == recipient.getCurrency()) {
-            makeAPayment(payer, recipient, payment, 1);
+            makeAPayment(payer, recipient, payment, Currency.RUR, Currency.RUR);
         } else {
             switch (payer.getCurrency()) {
                 case RUR: {
                     switch (recipient.getCurrency()) {
-                        case USD: makeAPayment(payer, recipient, payment, 1f / Currency.RUR_TO_USD); break;
-                        case EUR: makeAPayment(payer, recipient, payment, 1f / Currency.RUR_TO_EUR); break;
+                        case USD: makeAPayment(payer, recipient, payment, Currency.RUR, Currency.USD); break;
+                        case EUR: makeAPayment(payer, recipient, payment, Currency.RUR, Currency.EUR); break;
                     }
                     break;
                 }
                 case EUR: {
                     switch (recipient.getCurrency()) {
-                        case RUR: makeAPayment(payer, recipient, payment, Currency.RUR_TO_EUR); break;
+                        case RUR: makeAPayment(payer, recipient, payment, Currency.EUR, Currency.RUR); break;
                         case USD: return Result.INSUFFICIENT_FUNDS;
                     }
                     break;
                 }
                 case USD: {
                     switch (recipient.getCurrency()) {
-                        case RUR: makeAPayment(payer, recipient, payment, Currency.RUR_TO_USD); break;
+                        case RUR: makeAPayment(payer, recipient, payment, Currency.USD, Currency.RUR); break;
                         case EUR: return Result.INSUFFICIENT_FUNDS;
                     }
                     break;
@@ -96,9 +95,9 @@ public class AccountServiceImpl implements AccountService {
         return Result.OK;
     }
 
-    private void makeAPayment(Account payer, Account recipient, Payment payment, float convert){
+    private void makeAPayment(Account payer, Account recipient, Payment payment, Currency from, Currency to) {
         payer.setBalance(payer.getBalance() - payment.getAmount());
-        recipient.setBalance(recipient.getBalance() + payment.getAmount() * convert);
+        recipient.setBalance(recipient.getBalance() + (from.equals(to) ? payment.getAmount() : from.to(payment.getAmount(), to)));
 
     }
 }
