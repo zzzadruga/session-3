@@ -12,7 +12,13 @@ public class Parking {
     private Map<Long, ParkingTime> cars;
     private float costPerHour;
 
-    public Parking(int capacity, float costPerHour) {
+    public Parking(int capacity, float costPerHour) throws Exception {
+        if (capacity < 1) {
+            throw new Exception("Вместимость парковки не может быть меньше 1");
+        }
+        if (costPerHour < 0) {
+            throw new Exception("Стомость парковки не может быть меньше 0");
+        }
         this.capacity = capacity;
         this.costPerHour = costPerHour;
         cars = new HashMap<>(capacity, 1);
@@ -34,7 +40,9 @@ public class Parking {
                 throw new Exception("Время выезда раньше времени въезда!");
             } else {
                 car.departure = time;
-                return getPrice(car);
+                float price = getPrice(car);
+                cars.remove(carId);
+                return price;
             }
         } else {
             throw new Exception("Автомобиль отсутствует на парковке!");
@@ -75,12 +83,6 @@ public class Parking {
         }
         nightHours.add((long) begin.getHour());
         return nightHours;
-    }
-
-    public static void main(String[] args) throws Exception {
-        Parking parking = new Parking(30, 40);
-        parking.arrival(1, 23);
-        System.out.println(parking.departure(1, 30));
     }
 
     class ParkingTime {
